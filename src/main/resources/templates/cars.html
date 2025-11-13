@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Cars</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 2rem; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: .6rem; text-align: left; }
+        th { background: #f7f7f7; }
+    </style>
+</head>
+<body>
+<h1>Cars</h1>
+
+<p>
+    Show first:
+    <a th:href="@{/cars(count=2)}">2</a> |
+    <a th:href="@{/cars(count=3)}">3</a> |
+    <a th:href="@{/cars(count=5)}">5</a> |
+    <a th:href="@{/cars}">All</a>
+</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Brand</th>
+        <th>Model</th>
+        <th>Year</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="car, stat : ${cars}">
+        <td th:text="${stat.index + 1}"></td>
+        <td th:text="${car.brand}"></td>
+        <td th:text="${car.model}"></td>
+        <td th:text="${car.year}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<p>
+    <a class="back" th:href="@{/}">← Back to Home</a>
+</p>
+</body>
+</html>
