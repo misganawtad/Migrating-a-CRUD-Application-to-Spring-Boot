@@ -3,25 +3,71 @@
 <head>
     <meta charset="UTF-8"/>
     <title th:text="${user.id} != null ? 'Edit User' : 'New User'">User</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #fafafa;
+        }
+        h1 {
+            color: #333;
+            display: inline-block;
+        }
+        label {
+            display: block;
+            margin: 8px 0;
+        }
+        input, select {
+            padding: 4px 6px;
+            margin-left: 8px;
+        }
+        button, a.btn-link {
+            padding: 6px 10px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            text-decoration: none;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        button:hover, a.btn-link:hover {
+            background: #0056b3;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-<h1 th:text="${user.id} != null ? 'Edit User' : 'New User'">User</h1>
 
-<form th:action="${user.id} != null ? @{'/users/' + ${user.id}} : @{/users}"
+<div class="top-bar">
+    <h1 th:text="${user.id} != null ? 'Edit User' : 'New User'">User</h1>
+
+    <!-- Logout on every page -->
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Logout</button>
+    </form>
+</div>
+
+<form th:action="${user.id} != null ? @{'/admin/users/' + ${user.id}} : @{/admin/users}"
       method="post"
       th:object="${user}">
 
     <label>First name:
         <input type="text" th:field="*{firstName}" required/>
-    </label><br/>
+    </label>
 
     <label>Last name:
         <input type="text" th:field="*{lastName}" required/>
-    </label><br/>
+    </label>
 
     <label>Email:
         <input type="email" th:field="*{email}"/>
-    </label><br/>
+    </label>
 
     <label>Car:
         <select th:field="*{carModel}">
@@ -33,10 +79,13 @@
                     th:selected="${car.model == user.carModel}">
             </option>
         </select>
-    </label><br/><br/>
+    </label>
+
+    <br/><br/>
 
     <button type="submit">Save</button>
-    <a th:href="@{/users}">Cancel</a>
+    <a class="btn-link" th:href="@{/admin/users}">Cancel</a>
 </form>
+
 </body>
 </html>

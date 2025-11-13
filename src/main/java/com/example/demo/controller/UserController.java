@@ -1,18 +1,16 @@
 package com.example.demo.controller;
 
-
+import com.example.demo.entity.User;
 import com.example.demo.service.CarService;
+import com.example.demo.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import com.example.demo.entity.User;
-import com.example.demo.service.UserService;
-import jakarta.validation.Valid;
-
 
 @Controller
-@RequestMapping("/users")
+@RequestMapping("/admin/users")
 public class UserController {
 
     private final UserService service;
@@ -30,10 +28,9 @@ public class UserController {
         if ("notfound".equals(error)) {
             model.addAttribute("errorMessage", "User not found or has been removed.");
         }
-        return "users";
+        return "users"; // templates/users.html
     }
 
-    // Create form
     @GetMapping("/new")
     public String createForm(Model model) {
         model.addAttribute("user", new User());
@@ -41,47 +38,46 @@ public class UserController {
         return "user-form";
     }
 
-    // Create submit
     @PostMapping
     public String create(@ModelAttribute("user") @Valid User user,
                          BindingResult br,
                          Model model) {
-        if (br.hasErrors()) return "user-form";
-        model.addAttribute("cars", carService.getCars(null));
+        if (br.hasErrors()) {
+            model.addAttribute("cars", carService.getCars(null));
+            return "user-form";
+        }
         service.save(user);
-        return "redirect:/users";
+        return "redirect:/admin/users";
     }
 
-    // Edit form (null guard → redirect with message)
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         User u = service.findById(id);
-        if (u == null) return "redirect:/users?error=notfound";
+        if (u == null) return "redirect:/admin/users?error=notfound";
         model.addAttribute("user", u);
         model.addAttribute("cars", carService.getCars(null));
         return "user-form";
     }
 
-
     @PostMapping("/{id}")
     public String update(@PathVariable Long id,
                          @ModelAttribute("user") @Valid User user,
-                         BindingResult br, Model model) {
+                         BindingResult br,
+                         Model model) {
         if (br.hasErrors()) {
             model.addAttribute("cars", carService.getCars(null));
             return "user-form";
         }
-        if (service.findById(id) == null) return "redirect:/users?error=notfound";
+        if (service.findById(id) == null) return "redirect:/admin/users?error=notfound";
         user.setId(id);
         service.save(user);
-        return "redirect:/users";
+        return "redirect:/admin/users";
     }
-
 
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id) {
-        if (service.findById(id) == null) return "redirect:/users?error=notfound";
+        if (service.findById(id) == null) return "redirect:/admin/users?error=notfound";
         service.deleteById(id);
-        return "redirect:/users";
+        return "redirect:/admin/users";
     }
 }

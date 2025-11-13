@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>User Home</title>
+</head>
+<body>
+<h1>User Home</h1>
+
+<p th:text="'Hello, ' + ${user.firstName} + ' ' + ${user.lastName}">User Name</p>
+<p th:text="'Email: ' + ${user.email}">Email</p>
+
+<p>Roles:</p>
+<ul>
+    <li th:each="r : ${user.roles}" th:text="${r.name}">ROLE_X</li>
+</ul>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Logout</button>
+</form>
+
+</body>
+</html>
