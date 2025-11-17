@@ -1,10 +1,10 @@
 package com.example.demo.config;
 
-import com.example.demo.security.LoginSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,36 +15,29 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
-    private final LoginSuccessHandler loginSuccessHandler;
 
-    public SecurityConfig(UserDetailsService userDetailsService,
-                          LoginSuccessHandler loginSuccessHandler) {
+    public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
-        this.loginSuccessHandler = loginSuccessHandler;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // for simplicity + H2
+                .csrf(csrf -> csrf.disable())  // Disable CSRF for REST APIs
                 .userDetailsService(userDetailsService)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Stateless for REST
+                )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()  // Public login/logout
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")          // ✔ only ADMIN
-                        .requestMatchers("/user").hasAnyRole("USER", "ADMIN")   // ✔ USER + ADMIN
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Admin APIs
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")  // User APIs
+                        .requestMatchers("/api/users/**").permitAll()  // Public CRUD
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .successHandler(loginSuccessHandler)
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .permitAll()
-                );
+                .httpBasic(basic -> {})  // Use HTTP Basic Auth instead of form login
+                .formLogin(form -> form.disable());  // Disable form-based login
 
         // For H2 console
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));

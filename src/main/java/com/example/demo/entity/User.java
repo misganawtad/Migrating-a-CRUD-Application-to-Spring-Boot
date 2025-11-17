@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +34,8 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String email;
 
+    @NotBlank
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)  // Only allow writing, never reading
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
