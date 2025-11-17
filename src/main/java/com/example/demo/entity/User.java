@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,13 +26,14 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String lastName;
 
+    @Column(nullable = false)
+    @Min(0)
+    private int age;
+
     @Column(unique = true)
     private String email;
 
     private String password;
-
-    // Optional: from your previous code (car selected)
-    private String carModel;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -44,10 +46,14 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(String firstName, String lastName, String email) {
+    public User(String firstName, String lastName, String email, int age, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.age = age;
+        this.password = password;
+
+
     }
 
     // ----- your usual getters/setters -----
@@ -56,14 +62,17 @@ public class User implements UserDetails {
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
     public String getEmail() { return email; }
-    public String getCarModel() { return carModel; }
+    public int getAge() { return age; }
     public Set<Role> getRoles() { return roles; }
+
+
 
     public void setId(Long id) { this.id = id; }
     public void setFirstName(String v) { this.firstName = v; }
     public void setLastName(String v) { this.lastName = v; }
+    public void setAge(int v) { this.age = v; }
+
     public void setEmail(String v) { this.email = v; }
-    public void setCarModel(String carModel) { this.carModel = carModel; }
     public void setPassword(String password) { this.password = password; }
     public void setRoles(Set<Role> roles) { this.roles = roles; }
 

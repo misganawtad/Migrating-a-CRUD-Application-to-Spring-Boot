@@ -39,7 +39,6 @@ public class DemoApplication {
                 admin.setEmail("admin@example.com");
                 admin.setPassword(passwordEncoder.encode("password1234"));
                 admin.getRoles().add(adminRole);
-                admin.getRoles().add(userRole);
                 userRepository.save(admin);
 
                 // Normal USER (only USER role)
