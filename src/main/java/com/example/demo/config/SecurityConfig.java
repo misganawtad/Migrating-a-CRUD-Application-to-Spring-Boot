@@ -23,28 +23,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())  // Disable CSRF for REST APIs
+                .csrf(csrf -> csrf.disable())
                 .userDetailsService(userDetailsService)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Stateless for REST
-                )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()  // Public login/logout
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Admin APIs
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")  // User APIs
-                        .requestMatchers("/api/users/**").permitAll()  // Public CRUD
+                        .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(basic -> {})  // Use HTTP Basic Auth instead of form login
-                .formLogin(form -> form.disable());  // Disable form-based login
-
-        // For H2 console
+                .httpBasic(basic -> {});
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
-
         return http.build();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

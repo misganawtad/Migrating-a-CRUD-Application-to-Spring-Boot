@@ -5,36 +5,33 @@ import com.example.demo.entity.User;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 @RestController
 @RequestMapping("/api/users")
 public class UserRestController {
-
     private final UserService service;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-
     public UserRestController(UserService service, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.service = service;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    // GET all users
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(service.findAll());
     }
 
-    // GET user by ID
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         User user = service.findById(id);
@@ -46,7 +43,6 @@ public class UserRestController {
         return ResponseEntity.ok(user);
     }
 
-    // POST create new user
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody Map<String, Object> payload) {
         try {
@@ -55,20 +51,19 @@ public class UserRestController {
             user.setLastName((String) payload.get("lastName"));
             user.setAge((Integer) payload.get("age"));
             user.setEmail((String) payload.get("email"));
-
             // Encode password
             String rawPassword = (String) payload.get("password");
             user.setPassword(passwordEncoder.encode(rawPassword));
-
             // Set role
             String roleName = (String) payload.get("roleName");
             Role role = roleRepository.findByName(roleName)
                     .orElseThrow(() -> new IllegalStateException("Role not found: " + roleName));
             user.getRoles().add(role);
-
             User savedUser = service.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
-
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "Email already exists"));
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
@@ -76,7 +71,6 @@ public class UserRestController {
         }
     }
 
-    // PUT update existing user
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id,
                                         @RequestBody Map<String, Object> payload) {
@@ -88,7 +82,7 @@ public class UserRestController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
             }
 
-            // Update fields
+
             if (payload.containsKey("firstName")) {
                 existing.setFirstName((String) payload.get("firstName"));
             }
@@ -102,7 +96,7 @@ public class UserRestController {
                 existing.setEmail((String) payload.get("email"));
             }
 
-            // Update password only if provided
+
             if (payload.containsKey("password")) {
                 String password = (String) payload.get("password");
                 if (password != null && !password.isBlank()) {
@@ -110,7 +104,6 @@ public class UserRestController {
                 }
             }
 
-            // Update role if provided
             if (payload.containsKey("roleName")) {
                 String roleName = (String) payload.get("roleName");
                 existing.getRoles().clear();
@@ -138,9 +131,7 @@ public class UserRestController {
             error.put("error", "User not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
-
         service.deleteById(id);
-
         Map<String, String> response = new HashMap<>();
         response.put("message", "User deleted successfully");
         return ResponseEntity.ok(response);

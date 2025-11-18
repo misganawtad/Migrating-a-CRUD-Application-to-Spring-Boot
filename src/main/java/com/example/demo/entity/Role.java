@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -19,6 +20,7 @@ public class Role implements GrantedAuthority {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
+    @JsonIgnore  // ← Add this to prevent circular reference and lazy loading issues
     private Set<User> users = new HashSet<>();
 
     public Role() {
