@@ -127,10 +127,21 @@
 
     async function loadUsers() {
         try {
-            const response = await fetch('/api/users');
+            const response = await fetch('/api/users', {
+                headers: {
+                    'Authorization': 'Basic ' + authToken
+                }
+            });
+
             if (response.ok) {
                 const users = await response.json();
                 displayUsers(users);
+            } else if (response.status === 401 || response.status === 403) {
+                // not authenticated or not admin → go back to login
+                localStorage.clear();
+                window.location.href = '/login.html';
+            } else {
+                showError('Error loading users: ' + response.status);
             }
         } catch (error) {
             showError('Error loading users: ' + error.message);
@@ -180,7 +191,12 @@
 
     async function editUser(id) {
         try {
-            const response = await fetch(`/api/users/${id}`);
+            const response = await fetch(`/api/users/${id}`, {
+                headers: {
+                    'Authorization': 'Basic ' + authToken
+                }
+            });
+
             if (response.ok) {
                 const user = await response.json();
 
@@ -199,6 +215,11 @@
 
                 const adminRole = user.roles.find(r => r.name === 'ROLE_ADMIN');
                 document.getElementById('roleName').value = adminRole ? 'ROLE_ADMIN' : 'ROLE_USER';
+            } else if (response.status === 401 || response.status === 403) {
+                localStorage.clear();
+                window.location.href = '/login.html';
+            } else {
+                showError('Error loading user: ' + response.status);
             }
         } catch (error) {
             showError('Error loading user: ' + error.message);
