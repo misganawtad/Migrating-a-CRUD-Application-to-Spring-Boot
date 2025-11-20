@@ -39,12 +39,10 @@
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        // Store credentials for Basic Auth
         const credentials = btoa(email + ':' + password);
         localStorage.setItem('authToken', credentials);
         localStorage.setItem('userEmail', email);
         try {
-            // Test authentication by fetching user profile
             const response = await fetch('/api/user/profile', {
                 headers: {
                     'Authorization': 'Basic ' + credentials
@@ -53,8 +51,6 @@
             if (response.ok) {
                 const user = await response.json();
                 localStorage.setItem('user', JSON.stringify(user));
-
-                // Redirect based on role
                 if (user.roles.some(r => r.name === 'ROLE_ADMIN')) {
                     window.location.href = '/users.html';
                 } else {
